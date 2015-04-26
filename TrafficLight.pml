@@ -14,18 +14,30 @@ mtype pedestrianLight[2] = OFF;
 mtype turnLight[2] = OFF;
 
 
-// Make vehicle light RED, pedestrian light WALK and then notify the intersection
+// Make vehicle light ORANGE, pedestrian light WALK and then notify the intersection
 inline switchLinearToRed(vehicle, pedestrian) {
   /* Odering bug in Java code here */
-  vehicle=RED;
+  vehicle=ORANGE;
   pedestrian = WALK;
   toIntersection!ACK;
 }
 
+// Make vehicle light GREEN or ORANGE, pedestrian light DONT_WALK
+inline switchLinearTo(signal, vehicle, pedestrian) {
+  /* Odering bug in Java code here */
+  pedestrianLight[id]=DONT_WALK;
+  vehicleLight[id]=signal; 
+}
+
 // Make turn light RED and notify the intersection
-inline switchTurnToRed(vehicle) {
-  vehicle=RED;
+inline switchTurnToRed(turn) {
+  turn=RED;
   toIntersection!ACK;
+}
+
+// Make turn light GREEN or ORANGE and notify the intersection
+inline switchTurnTo(signal, turn) {
+  turn=signal;
 }
 
 proctype intersection() {
@@ -72,13 +84,11 @@ proctype stopLightSet(bit id) {
   do
   :: vehicleLight[id]==RED; 
      toStopLightSet[id]?ADVANCE -> 
-     pedestrianLight[id]=DONT_WALK; 
-     vehicleLight[id]=GREEN; 
+     switchLinearTo(GREEN, vehicleLight[id], pedestrianLight[id]);
      toStopLightSet[id]!PRE_STOP;
   :: vehicleLight[id]==GREEN; 
      toStopLightSet[id]?PRE_STOP -> 
-     pedestrianLight[id]=DONT_WALK;
-     vehicleLight[id]=ORANGE; 
+     switchLinearTo(ORANGE, vehicleLight[id], pedestrianLight[id]);
      toStopLightSet[id]!STOP;
   :: vehicleLight[id]==ORANGE; 
      toStopLightSet[id]?STOP ->
@@ -92,11 +102,11 @@ proctype turnLightSet(bit id) {
   do
   :: turnLight[id]==RED; 
      toTurnLightSet[id]?ADVANCE -> 
-     turnLight[id]=GREEN; 
+     switchTurnTo(GREEN, turnLight[id]);
      toTurnLightSet[id]!PRE_STOP;
   :: turnLight[id]==GREEN; 
      toTurnLightSet[id]?PRE_STOP -> 
-     turnLight[id]=ORANGE; 
+     switchTurnTo(ORANGE, turnLight[id]);
      toTurnLightSet[id]!STOP;
   :: turnLight[id]==ORANGE; 
      toTurnLightSet[id]?STOP ->
