@@ -1,23 +1,39 @@
-#include "properties.pml" 
+ /* Note, in this version, skip the following details:
+   1. event queue capacity set to 1 (it's 5 in real code)
+   2. don't have interrupt functionality for now.
+      which means, can not disalbe when enable 
+   3. do not handle error condition, if there's an error case, 
+      SPIN will detect deadlock
+   4. No delay now
+   5. Do not implement block/unblock pedestrian control here
+   
+   // TODO, consider Delay?
+   // TODO, refactor code to make it more readlbe 
+ */ 
+
+#include "properties.pml"
 
 mtype = {OFF, GREEN, RED, ORANGE};  // signal state of vehicle and turn light
-mtype = {WALK, DONT_WALK};  // signal state of pedestrian light
+mtype = {WALK, DONT_WALK};          // signal state of pedestrian light
 mtype = {INIT, ADVANCE, PRE_STOP, STOP, ALL_STOP};  // events
-mtype = {ACK};
+mtype = {ACK};   // whenever light-set finished its task, send ACK to toIntersection 
+                 // channel to let intersection move forward
 
-chan toStopLightSet[2] = [1] of {mtype};
-chan toTurnLightSet[2] = [1] of {mtype};
-chan toIntersection = [1] of {mtype};
+/* Channels declaration */
+chan toStopLightSet[2] = [1] of {mtype}; // event queue for StopLights
+chan toTurnLightSet[2] = [1] of {mtype}; // event queue for TurnLights
+chan toIntersection = [1] of {mtype};    // let light-sets to notfiy intersection
 
-mtype vehicleLight[2] = OFF;
-mtype pedestrianLight[2] = OFF;
-mtype turnLight[2] = OFF;
+/* Global variables to reflect current status */
+mtype vehicleLight[2] = OFF;      // status of vehicleLight, can be OFF, GREEN, RED, ORANGE
+mtype pedestrianLight[2] = OFF;   // status of pedestrianLight, can be OFF, WALK, DONT_WALK
+mtype turnLight[2] = OFF;         // status of turnLight, can be OFF, GREEN, RED, ORANGE
 
-
-// Make vehicle light ORANGE, pedestrian light WALK and then notify the intersection
+/* Inline functions declaration */
+// Make vehicle light RED, pedestrian light WALK and then notify the intersection
 inline switchLinearToRed(vehicle, pedestrian) {
   /* Odering bug in Java code here */
-  vehicle=ORANGE;
+  vehicle=RED;
   pedestrian = WALK;
   toIntersection!ACK;
 }
@@ -40,6 +56,7 @@ inline switchTurnTo(signal, turn) {
   turn=signal;
 }
 
+/* Processes declaration */
 proctype intersection() {
   run stopLightSet(0);
   run stopLightSet(1);
@@ -117,4 +134,3 @@ proctype turnLightSet(bit id) {
 init {
   run intersection();
 }
-
