@@ -13,6 +13,21 @@ mtype vehicleLight[2] = OFF;
 mtype pedestrianLight[2] = OFF;
 mtype turnLight[2] = OFF;
 
+
+// Make vehicle light RED, pedestrian light WALK and then notify the intersection
+inline switchLinearToRed(vehicle, pedestrian) {
+  /* Odering bug in Java code here */
+  vehicle=RED;
+  pedestrian = WALK;
+  toIntersection!ACK;
+}
+
+// Make turn light RED and notify the intersection
+inline switchTurnToRed(vehicle) {
+  vehicle=RED;
+  toIntersection!ACK;
+}
+
 proctype intersection() {
   run stopLightSet(0);
   run stopLightSet(1);
@@ -53,8 +68,7 @@ proctype intersection() {
 
 proctype stopLightSet(bit id) {
   toStopLightSet[id]?INIT -> 
-  vehicleLight[id]=RED; pedestrianLight[id] = WALK;  /* Odering bug in Java code here */
-  toIntersection!ACK;
+  switchLinearToRed(vehicleLight[id], pedestrianLight[id]);
   do
   :: vehicleLight[id]==RED; 
      toStopLightSet[id]?ADVANCE -> 
@@ -62,29 +76,31 @@ proctype stopLightSet(bit id) {
      vehicleLight[id]=GREEN; 
      toStopLightSet[id]!PRE_STOP;
   :: vehicleLight[id]==GREEN; 
-     toStopLightSet[id]?PRE_STOP -> pedestrianLight[id]=DONT_WALK;
+     toStopLightSet[id]?PRE_STOP -> 
+     pedestrianLight[id]=DONT_WALK;
      vehicleLight[id]=ORANGE; 
      toStopLightSet[id]!STOP;
   :: vehicleLight[id]==ORANGE; 
-     toStopLightSet[id]?STOP -> vehicleLight[id]=RED; 
-     pedestrianLight[id] = WALK; 
-     toIntersection!ACK;
+     toStopLightSet[id]?STOP ->
+     switchLinearToRed(vehicleLight[id], pedestrianLight[id]);
   od
 }
 
 proctype turnLightSet(bit id) {
-  toTurnLightSet[id]?INIT -> turnLight[id]=RED;
-  toIntersection!ACK;
+  toTurnLightSet[id]?INIT -> 
+  switchTurnToRed(turnLight[id]);
   do
   :: turnLight[id]==RED; 
-     toTurnLightSet[id]?ADVANCE -> turnLight[id]=GREEN; 
+     toTurnLightSet[id]?ADVANCE -> 
+     turnLight[id]=GREEN; 
      toTurnLightSet[id]!PRE_STOP;
   :: turnLight[id]==GREEN; 
-     toTurnLightSet[id]?PRE_STOP -> turnLight[id]=ORANGE; 
+     toTurnLightSet[id]?PRE_STOP -> 
+     turnLight[id]=ORANGE; 
      toTurnLightSet[id]!STOP;
   :: turnLight[id]==ORANGE; 
-     toTurnLightSet[id]?STOP -> turnLight[id]=RED; 
-     toIntersection!ACK;
+     toTurnLightSet[id]?STOP ->
+     switchTurnToRed(turnLight[id]);
   od
 }
 
