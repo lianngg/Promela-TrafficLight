@@ -50,10 +50,10 @@ proctype stopLightSet(bit id) {
   toIntersection!ACK;
   do
   :: vehicleLight[id]==RED; 
-  	 toStopLightSet[id]?ADVANCE -> 
-  	 pedestrianLight[id]=DONT_WALK; 
-  	 vehicleLight[id]=GREEN; 
-  	 toStopLightSet[id]!PRE_STOP;
+     toStopLightSet[id]?ADVANCE -> 
+     pedestrianLight[id]=DONT_WALK; 
+     vehicleLight[id]=GREEN; 
+     toStopLightSet[id]!PRE_STOP;
   :: vehicleLight[id]==GREEN; 
      toStopLightSet[id]?PRE_STOP -> pedestrianLight[id]=DONT_WALK;
      vehicleLight[id]=ORANGE; 
@@ -88,6 +88,43 @@ init {
   run turnLightSet(1);
   run intersection();
 }
+
+
+/* Below should be in properties file */
+/* Property name and its content mapping table
+   <Safety>
+   p1 
+     If the system is disabled, all system components should return to their OFF state
+   p2 
+     Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED
+   p3 
+     Always when a pedestrian light is on WALK, all vehicle turn lights must be RED
+     -> This property is always failed, may consider to refine property discription 
+   p4
+     Always a pedestrian light is switched to WALK after the opposite vehicular lights
+     have been switched to RED
+   p5 
+     Always a pedestrian light is switched to DON’T WALK before the opposite vehicular
+     lights are switched to GREEN
+     
+   <Liveness>  
+   p6 
+     Always, eventually: incoming pedestrians from any direction can cross the
+     intersection in that direction.  
+   p7 
+     Always, eventually: incoming vehicles from any direction can cross the 
+     intersection in that direction
+   p8 
+     Always, eventually: incoming vehicles from any direction can make a protected left turn
+   p9
+     For any vehicle light (stoplight or turn light), always: the signal eventually turns ORANGE
+   p10
+     For any vehicle light (stoplight or turn light), always: if a GREEN signal is on, it stays
+     on until the signal turns ORANGE
+   p11
+     For any vehicle light (stoplight or turn light), always: if a RED signal is on, it stays on
+     until the signal turns GREEN           
+*/
 
 /* Safety */
 // If the system is disabled, all system components should return to their OFF state
