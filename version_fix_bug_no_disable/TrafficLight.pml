@@ -38,6 +38,14 @@ inline switchLinearToRed(vehicle, pedestrian) {
   toIntersection!ACK;
 }
 
+// Refine from switchLinearToRed, if stopLight receive an INIT, it should
+// call switchLinearToInit instead of switchLinearToRed
+inline switchLinearToInit(vehicle, pedestrian) {
+  vehicle=RED;
+  pedestrian = DONT_WALK;  // Fix here
+  toIntersection!ACK;
+}
+
 // Make vehicle light GREEN or ORANGE, pedestrian light DONT_WALK
 inline switchLinearTo(signal, vehicle, pedestrian) {
   /* Odering bug in Java code here */
@@ -97,7 +105,7 @@ proctype intersection() {
 
 proctype stopLightSet(bit id) {
   toStopLightSet[id]?INIT -> 
-  switchLinearToRed(vehicleLight[id], pedestrianLight[id]);
+  switchLinearToInit(vehicleLight[id], pedestrianLight[id]);  // fix here
   do
   :: vehicleLight[id]==RED; 
      toStopLightSet[id]?ADVANCE -> 
