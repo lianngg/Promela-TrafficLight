@@ -6,7 +6,6 @@
      Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED
    p3 
      Always when a pedestrian light is on WALK, all vehicle turn lights must be RED
-     -> This property is always failed, may consider to refine property discription 
    p4
      Always a pedestrian light is switched to WALK after the opposite vehicular lights
      have been switched to RED
