@@ -222,8 +222,8 @@ ltl p10 {
 
 // For any vehicle light (stoplight or turn light), always: if a RED signal is on, it stays on until the signal turns GREEN.
 ltl p11 {
-  [](vehicleLight[0]==RED -> (vehicleLight[0]==RED U vehicleLight[0]==GREEN)) &&
-  [](vehicleLight[1]==RED -> (vehicleLight[1]==RED U vehicleLight[1]==GREEN)) &&
-  [](turnLight[0]==RED -> (turnLight[0]==RED U turnLight[0]==GREEN)) &&
-  [](turnLight[1]==RED -> (turnLight[1]==RED U turnLight[1]==GREEN))
+  [](vehicleLightRed(0) -> (vehicleLightRed(0) U vehicleLightGreen(0))) &&
+  [](vehicleLightRed(1) -> (vehicleLightRed(1) U vehicleLightGreen(1))) &&
+  [](turnLightRed(0) -> (turnLightRed(0) U turnLightGreen(0))) &&
+  [](turnLightRed(1) -> (turnLightRed(1) U turnLightGreen(1)))
 }
