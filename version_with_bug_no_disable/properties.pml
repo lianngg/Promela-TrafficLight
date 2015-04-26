@@ -49,7 +49,8 @@
   /* TODO */
 //}
 
-// Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED   
+// Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED  
+/* Will fail because of switch light odering bug */ 
 ltl p2 {
   pedestrianWalkImplyVehicleLightRed(0) &&
   pedestrianWalkImplyVehicleLightRed(1)
@@ -59,14 +60,13 @@ ltl p2 {
 /* Init bug? Spec need to be clarify */
 ltl p3 {
   []( (pedestrianLightWalk(0) || pedestrianLightWalk(1) ) -> 
-      (turnLightRed(0)  && turnLightRed(1) ))
+      (turnLightRed(0) && turnLightRed(1)) )
 }
 
 // Always a pedestrian light is switched to WALK after the opposite vehicular lights have been switched to RED
-
 ltl p4 {
-  ([]( (pedestrianLight[0]==DONT_WALK && (X(pedestrianLight[0])==WALK)) -> vehicleLight[0]==RED )) && 
-  ([]( (pedestrianLight[1]==DONT_WALK && (X(pedestrianLight[1])==WALK)) -> vehicleLight[1]==RED ))
+  ([]( (pedestrianLight[0]==DONT_WALK && ((X(pedestrianLight[0]))==WALK)) -> vehicleLight[0]==RED )) && 
+  ([]( (pedestrianLight[1]==DONT_WALK && ((X(pedestrianLight[1]))==WALK)) -> vehicleLight[1]==RED ))
 }
 
 

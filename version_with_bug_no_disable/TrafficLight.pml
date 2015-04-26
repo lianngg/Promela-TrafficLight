@@ -33,16 +33,16 @@ mtype turnLight[2] = OFF;         // status of turnLight, can be OFF, GREEN, RED
 // Make vehicle light RED, pedestrian light WALK and then notify the intersection
 inline switchLinearToRed(vehicle, pedestrian) {
   /* Odering bug in Java code here */
-  vehicle=RED;
   pedestrian = WALK;
+  vehicle=RED;
   toIntersection!ACK;
 }
 
 // Make vehicle light GREEN or ORANGE, pedestrian light DONT_WALK
 inline switchLinearTo(signal, vehicle, pedestrian) {
   /* Odering bug in Java code here */
-  pedestrianLight[id]=DONT_WALK;
-  vehicleLight[id]=signal; 
+  vehicle=signal; 
+  pedestrian=DONT_WALK;
 }
 
 // Make turn light RED and notify the intersection
