@@ -65,8 +65,8 @@ ltl p3 {
 
 // Always a pedestrian light is switched to WALK after the opposite vehicular lights have been switched to RED
 ltl p4 {
-  ([]( (pedestrianLight[0]==DONT_WALK && (X(pedestrianLight[0])==WALK)) -> vehicleLight[0]==RED )) && 
-  ([]( (pedestrianLight[1]==DONT_WALK && (X(pedestrianLight[1])==WALK)) -> vehicleLight[1]==RED ))
+  ([]( (pedestrianLight[0]==DONT_WALK && ((X(pedestrianLight[0]))==WALK)) -> vehicleLight[0]==RED )) && 
+  ([]( (pedestrianLight[1]==DONT_WALK && ((X(pedestrianLight[1]))==WALK)) -> vehicleLight[1]==RED ))
 }
 
 
