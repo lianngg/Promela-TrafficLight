@@ -150,6 +150,11 @@ init {
 //}
 
 #define pedestrianWalkImplyVehicleLightRed(i) ([]( pedestrianLight[i]==WALK -> vehicleLight[i]==RED  ))
+#define vehicleLightGreen(i) ( vehicleLight[i]==GREEN )
+#define vehicleLightOrange(i) ( vehicleLight[i]==ORANGE )
+#define turnLightGreen(i) ( turnLight[i]==GREEN )
+#define turnLightOrange(i) ( turnLight[i]==ORANGE )
+#define pedestrianLightWalk(i) (pedestrianLight[i] == WALK)
 
 // Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED   
 ltl p2 {
@@ -181,27 +186,25 @@ ltl p5 {
 /* Liveness */
 // Always, eventually: incoming pedestrians from any direction can cross the intersection in that direction.
 ltl p6 {
-  [](<>(pedestrianLight[0]==WALK) && <>(pedestrianLight[1]==WALK))
+  []((<>pedestrianLightWalk(0)) && (<>pedestrianLightWalk(1)))
 }
 
 // Always, eventually: incoming vehicles from any direction can cross the intersection in that direction.
 ltl p7 {
-  [](<>(vehicleLight[0]==GREEN) &&
-     <>(vehicleLight[1]==GREEN))
+  []( (<>vehicleLightGreen(0)) && (<>vehicleLightGreen(1)) )
 }
 
 // Always, eventually: incoming vehicles from any direction can make a protected left turn.
 ltl p8 {
-  [](<>(turnLight[0]==GREEN) &&
-     <>(turnLight[1]==GREEN))
+  []( (<>turnLightGreen(0)) && (<>turnLightGreen(1)) )
 }
 
 // For any vehicle light (stoplight or turn light), always: the signal eventually turns ORANGE. 
 ltl p9 {
-  [](<>(vehicleLight[0]==ORANGE) &&
-     <>(vehicleLight[1]==ORANGE) &&
-     <>(turnLight[0]==ORANGE) &&
-     <>(turnLight[1]==ORANGE))
+  []((<>turnLightOrange(0)) &&
+     (<>turnLightOrange(1)) &&
+     (<>vehicleLightOrange(0)) &&
+     (<>vehicleLightOrange(1)))
 }
 
 // For any vehicle light (stoplight or turn light), always: if a GREEN signal is on, it stays on until the signal turns ORANGE.
