@@ -49,8 +49,8 @@ inline switchLinearToInit(vehicle, pedestrian) {
 // Make vehicle light GREEN or ORANGE, pedestrian light DONT_WALK
 inline switchLinearTo(signal, vehicle, pedestrian) {
   /* Odering bug in Java code here */
-  pedestrianLight[id]=DONT_WALK;
-  vehicleLight[id]=signal; 
+  pedestrian=DONT_WALK;
+  vehicle[id]=signal; 
 }
 
 // Make turn light RED and notify the intersection
