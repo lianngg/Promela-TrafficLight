@@ -50,7 +50,7 @@ inline switchTurnToRed(turn) {
   toIntersection!ACK;
 }
 
-// Make turn light GREEN or ORANGE and notify the intersection
+// Make turn light GREEN or ORANGE
 inline switchTurnTo(signal, turn) {
   turn=signal;
 }
