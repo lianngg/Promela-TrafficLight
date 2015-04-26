@@ -143,18 +143,21 @@ init {
      until the signal turns GREEN           
 */
 
+#define pedestrianWalkImplyVehicleLightRed(i) ([]( pedestrianLight[i]==WALK -> vehicleLight[i]==RED  ))
+#define vehicleLightGreen(i) ( vehicleLight[i]==GREEN )
+#define vehicleLightOrange(i) ( vehicleLight[i]==ORANGE )
+#define vehicleLightRed(i) ( vehicleLight[i]==RED )
+#define turnLightGreen(i) ( turnLight[i]==GREEN )
+#define turnLightOrange(i) ( turnLight[i]==ORANGE )
+#define turnLightRed(i) ( turnLight[i]==RED )
+#define pedestrianLightWalk(i) (pedestrianLight[i] == WALK)
+#define pedestrianLightDontWalk(i) (pedestrianLight[i] == DONT_WALK)
+
 /* Safety */
 // If the system is disabled, all system components should return to their OFF state
 //ltl p1 {
   /* TODO */
 //}
-
-#define pedestrianWalkImplyVehicleLightRed(i) ([]( pedestrianLight[i]==WALK -> vehicleLight[i]==RED  ))
-#define vehicleLightGreen(i) ( vehicleLight[i]==GREEN )
-#define vehicleLightOrange(i) ( vehicleLight[i]==ORANGE )
-#define turnLightGreen(i) ( turnLight[i]==GREEN )
-#define turnLightOrange(i) ( turnLight[i]==ORANGE )
-#define pedestrianLightWalk(i) (pedestrianLight[i] == WALK)
 
 // Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED   
 ltl p2 {
@@ -165,17 +168,19 @@ ltl p2 {
 // Always when a pedestrian light is on WALK, all vehicle turn lights must be RED
 /* Init bug? Spec need to be clarify */
 ltl p3 {
-  []( (pedestrianLight[0]==WALK || pedestrianLight[1]==WALK) -> 
-      (turnLight[0]==RED  && turnLight[1]==RED) )
+  []( (pedestrianLightWalk(0) || pedestrianLightWalk(1) ) -> 
+      (turnLightRed(0)  && turnLightRed(1) ))
 }
 
 // Always a pedestrian light is switched to WALK after the opposite vehicular lights have been switched to RED
+
 ltl p4 {
-  ([]( (pedestrianLight[0]==DONT_WALK && (X(pedestrianLight[0])==WALK)) -> 
+  ([]( (pedestrianLight[0]==DONT_WALK && (X(pedestrianLight[0])==WALK))  -> 
         vehicleLight[0]==RED )) && 
   ([]( (pedestrianLight[1]==DONT_WALK && (X(pedestrianLight[1])==WALK)) -> 
         vehicleLight[1]==RED ))
 }
+
 
 // Always a pedestrian light is switched to DON’T WALK before the opposite vehicular lights are switched to GREEN
 ltl p5 {
