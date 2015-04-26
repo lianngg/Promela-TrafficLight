@@ -80,11 +80,13 @@ proctype intersection() {
     toIntersection?ACK -> toStopLightSet[0]!ADVANCE;
     toIntersection?ACK -> toStopLightSet[1]!ADVANCE;
     
-    // block pedestrians
+    // block pedestrians, please we only change the light status 
+    // but not model the detail operation of pedestrianLight on/off because
+    // we think it's not important
     toIntersection?ACK ->
     pedestrianLight[0] = DONT_WALK;
     pedestrianLight[1] = DONT_WALK;
-    toIntersection!ACK;
+    toIntersection!ACK; // send an ack to itself to let intersection move forward
     
     // advance turn lights
     toIntersection?ACK -> toTurnLightSet[0]!ADVANCE;
@@ -92,7 +94,7 @@ proctype intersection() {
     
     // unblock pedestrians (No need to model this)
     
-  goto again
+  goto again  // repeat again and again
 }
 
 proctype stopLightSet(bit id) {
