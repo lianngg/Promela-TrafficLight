@@ -44,6 +44,9 @@
 #define pedestrianLightDontWalk(i) (pedestrianLight[i] == DONT_WALK)
 
 /* Safety */
+// p0: Once enabled, the system should not deadlock until it is interrupted or disabled.
+// This property will be checked by SPIN Safety option
+
 // If the system is disabled, all system components should return to their OFF state
 //ltl p1 {
   /* TODO */

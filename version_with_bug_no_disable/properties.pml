@@ -44,13 +44,15 @@
 #define pedestrianLightDontWalk(i) (pedestrianLight[i] == DONT_WALK)
 
 /* Safety */
+// p0: Once enabled, the system should not deadlock until it is interrupted or disabled.
+// This property will be checked by SPIN Safety option
+
 // If the system is disabled, all system components should return to their OFF state
 //ltl p1 {
   /* TODO */
 //}
 
 // Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED  
-/* Will fail because of switch light odering bug */ 
 ltl p2 {
   pedestrianWalkImplyVehicleLightRed(0) &&
   pedestrianWalkImplyVehicleLightRed(1)
