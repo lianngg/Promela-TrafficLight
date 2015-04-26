@@ -148,10 +148,13 @@ init {
 //ltl p1 {
   /* TODO */
 //}
-// Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED
+
+#define pedestrianWalkImplyVehicleLightRed(i) ([]( pedestrianLight[i]==WALK -> vehicleLight[i]==RED  ))
+
+// Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED   
 ltl p2 {
-  ([]( pedestrianLight[0]==WALK -> vehicleLight[0]==RED )) &&
-  ([]( pedestrianLight[1]==WALK -> vehicleLight[1]==RED ))
+  pedestrianWalkImplyVehicleLightRed(0) &&
+  pedestrianWalkImplyVehicleLightRed(1)
 }
 
 // Always when a pedestrian light is on WALK, all vehicle turn lights must be RED
