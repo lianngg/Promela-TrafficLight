@@ -27,21 +27,33 @@ chan toIntersection = [1] of {mtype};    // let light-sets to notfiy intersectio
 mtype vehicleLight[2] = OFF;      // status of vehicleLight, can be OFF, GREEN, RED, ORANGE
 mtype pedestrianLight[2] = OFF;   // status of pedestrianLight, can be OFF, WALK, DONT_WALK
 mtype turnLight[2] = OFF;         // status of turnLight, can be OFF, GREEN, RED, ORANGE
+bool pedestrianLightPositvieEdge[2] = false; // indicate from don't walk to walk 
+bool pedestrianLightNegativeEdge[2] = false; // indicate from walk to don't walk
 
 /* Inline functions declaration */
 // Make vehicle light RED, pedestrian light WALK and then notify the intersection
-inline switchLinearToRed(vehicle, pedestrian) {
+inline switchLinearToRed(vehicle, pedestrian, id) {
   /* Odering bug in Java code here */
+  if 
+  :: pedestrian == DONT_WALK -> pedestrianLightPositvieEdge[id] = true;
+  :: else skip;
+  fi
   pedestrian = WALK;
+  pedestrianLightPositvieEdge[id] = false;
   vehicle=RED;
   toIntersection!ACK;
 }
 
 // Make vehicle light GREEN or ORANGE, pedestrian light DONT_WALK
-inline switchLinearTo(signal, vehicle, pedestrian) {
+inline switchLinearTo(signal, vehicle, pedestrian, id) {
   /* Odering bug in Java code here */
   vehicle=signal; 
+  if 
+  :: pedestrian == WALK -> pedestrianLightNegativeEdge[id] = true;
+  :: else skip;
+  fi
   pedestrian=DONT_WALK;
+  pedestrianLightNegativeEdge[id] = false;
 }
 
 // Make turn light RED and notify the intersection
@@ -98,19 +110,19 @@ proctype intersection() {
 
 proctype stopLightSet(bit id) {
   toStopLightSet[id]?INIT -> 
-  switchLinearToRed(vehicleLight[id], pedestrianLight[id]);
+  switchLinearToRed(vehicleLight[id], pedestrianLight[id], id);
   do
   :: vehicleLight[id]==RED; 
      toStopLightSet[id]?ADVANCE -> 
-     switchLinearTo(GREEN, vehicleLight[id], pedestrianLight[id]);
+     switchLinearTo(GREEN, vehicleLight[id], pedestrianLight[id], id);
      toStopLightSet[id]!PRE_STOP;
   :: vehicleLight[id]==GREEN; 
      toStopLightSet[id]?PRE_STOP -> 
-     switchLinearTo(ORANGE, vehicleLight[id], pedestrianLight[id]);
+     switchLinearTo(ORANGE, vehicleLight[id], pedestrianLight[id], id);
      toStopLightSet[id]!STOP;
   :: vehicleLight[id]==ORANGE; 
      toStopLightSet[id]?STOP ->
-     switchLinearToRed(vehicleLight[id], pedestrianLight[id]);
+     switchLinearToRed(vehicleLight[id], pedestrianLight[id], id);
   od
 }
 

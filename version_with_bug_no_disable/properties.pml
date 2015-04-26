@@ -58,7 +58,6 @@ ltl p2 {
 }
 
 // Always when a pedestrian light is on WALK, all vehicle turn lights must be RED
-/* Init bug? Spec need to be clarify */
 ltl p3 {
   []( (pedestrianLightWalk(0) || pedestrianLightWalk(1) ) -> 
       (turnLightRed(0) && turnLightRed(1)) )
@@ -66,15 +65,15 @@ ltl p3 {
 
 // Always a pedestrian light is switched to WALK after the opposite vehicular lights have been switched to RED
 ltl p4 {
-  ([]( (pedestrianLight[0]==DONT_WALK && ((X(pedestrianLight[0]))==WALK)) -> vehicleLight[0]==RED )) && 
-  ([]( (pedestrianLight[1]==DONT_WALK && ((X(pedestrianLight[1]))==WALK)) -> vehicleLight[1]==RED ))
+  [] ( (pedestrianLightPositvieEdge[0] == true) -> vehicleLight[0]==RED) &&
+  [] ( (pedestrianLightPositvieEdge[1] == true) -> vehicleLight[1]==RED) 
 }
 
 
 // Always a pedestrian light is switched to DON’T WALK before the opposite vehicular lights are switched to GREEN
 ltl p5 {
-  ([]( (vehicleLight[0]==RED && (X(vehicleLight[0])==GREEN)) -> (pedestrianLight[0]==DONT_WALK) )) &&
-  ([]( (vehicleLight[1]==RED && (X(vehicleLight[1])==GREEN)) -> (pedestrianLight[1]==DONT_WALK) ))
+  [] ( (pedestrianLightNegativeEdge[0] == true) -> vehicleLight[0]!=GREEN) &&
+  [] ( (pedestrianLightNegativeEdge[1] == true) -> vehicleLight[1]!=GREEN) 
 }
 
 /* Liveness */
