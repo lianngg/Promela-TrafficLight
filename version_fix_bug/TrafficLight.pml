@@ -15,13 +15,13 @@
 mtype = {OFF, GREEN, RED, ORANGE};  // signal state of vehicle and turn light
 mtype = {WALK, DONT_WALK};          // signal state of pedestrian light
 mtype = {INIT, ADVANCE, PRE_STOP, STOP, ALL_STOP};  // events
-mtype = {ACK};   // whenever light-set finished its task, send ACK to toIntersection 
-                 // channel to let intersection move forward
+mtype = {ACK, INTERRUPT};   // whenever light-set finished its task, send ACK to toIntersection 
+                 			// channel to let intersection move forward
 
 /* Channels declaration */
 chan toStopLightSet[2] = [1] of {mtype}; // event queue for StopLights
 chan toTurnLightSet[2] = [1] of {mtype}; // event queue for TurnLights
-chan toIntersection = [1] of {mtype};    // let light-sets to notfiy intersection
+chan toIntersection = [5] of {mtype};    // let light-sets to notfiy intersection
 
 /* Global variables to reflect current status */
 mtype vehicleLight[2] = OFF;      // status of vehicleLight, can be OFF, GREEN, RED, ORANGE
@@ -30,6 +30,7 @@ mtype turnLight[2] = OFF;         // status of turnLight, can be OFF, GREEN, RED
 bool pedestrianLightPositvieEdge[2] = false; // indicate from don't walk to walk 
 bool pedestrianLightNegativeEdge[2] = false; // indicate from walk to don't walk
 bool isIntersectionDisabled = false; // status of the intersection, true when it is disabled
+bool intersectionHasBeenDisabled = false;
 
 /* Inline functions declaration */
 // Make vehicle light RED, pedestrian light WALK and then notify the intersection
@@ -65,13 +66,6 @@ inline switchLinearTo(signal, id) {
   vehicleLight[id]=signal; 
 }
 
-// Make vehicle light OFF, pedestrian light OFF
-inline switchLinearToOff(id) {
-  /* Odering bug in Java code here FIX */
-  pedestrianLight[id]=OFF;
-  vehicleLight[id]=OFF; 
-}
-
 // Make turn light RED and notify the intersection
 inline switchTurnToRed(turn) {
   turn=RED;
@@ -84,19 +78,17 @@ inline switchTurnTo(signal, turn) {
 }
 
 inline checkACKorInterupt() {
-  do
-  :: isIntersectionDisabled -> goto terminate; break;
-  :: len(toIntersection) != 0 -> toIntersection?ACK; break;
-  :: else skip;
-  od
+  if
+  :: isIntersectionDisabled -> toIntersection?ACK; goto terminate;
+  :: else -> toIntersection?ACK;
+  fi
 }
 
 inline receiveEventOrInterupt(channel, event) {
-  do
-  :: isIntersectionDisabled -> goto terminate; 
-  :: len(channel) != 0 -> channel?event; 
-  :: else skip;
-  od
+  if
+  :: isIntersectionDisabled -> toIntersection!INTERRUPT; goto terminate; 
+  :: else -> channel?event; 
+  fi
 }
 
 /* Processes declaration */
@@ -140,7 +132,6 @@ proctype intersection() {
   goto again  // repeat again and again
 
   terminate:  // go to here only when the intersection is disabled
-  end:
 }
 
 proctype stopLightSet(bit id) {
@@ -152,18 +143,18 @@ proctype stopLightSet(bit id) {
      switchLinearTo(GREEN, id);
      toStopLightSet[id]!PRE_STOP;
   :: vehicleLight[id]==GREEN; 
-     receiveEventOrInterupt(toStopLightSet[id], PRE_STOP);
+     toStopLightSet[id]?PRE_STOP ->
      switchLinearTo(ORANGE, id);
      toStopLightSet[id]!STOP;
   :: vehicleLight[id]==ORANGE; 
-     receiveEventOrInterupt(toStopLightSet[id], STOP);
+     toStopLightSet[id]?STOP ->
      switchLinearToRed(id);
-  :: vehicleLight[id]==OFF;
+  :: vehicleLight[id]==OFF ->
+     toIntersection!ACK;
      break;
   od
 
   terminate:
-  end: pedestrianLight[id] = OFF; vehicleLight[id] = OFF;
 }
 
 proctype turnLightSet(bit id) {
@@ -175,33 +166,34 @@ proctype turnLightSet(bit id) {
      switchTurnTo(GREEN, turnLight[id]);
      toTurnLightSet[id]!PRE_STOP;
   :: turnLight[id]==GREEN; 
-     receiveEventOrInterupt(toTurnLightSet[id], PRE_STOP);
+     toTurnLightSet[id]?PRE_STOP ->
      switchTurnTo(ORANGE, turnLight[id]);
      toTurnLightSet[id]!STOP;
   :: turnLight[id]==ORANGE; 
-     receiveEventOrInterupt(toTurnLightSet[id], STOP);
+     toTurnLightSet[id]?STOP ->
      switchTurnToRed(turnLight[id]);
-  :: turnLight[id]==OFF;
+  :: turnLight[id]==OFF ->
+     toIntersection!ACK;
      break;
   od
 
   terminate:
-  end: turnLight[id] = OFF;
 }
 
 proctype disable() {
 /* Index bug of the loop in Java code here FIX */
-  atomic {  // Interrupt the intersection
-    empty(toIntersection);
-    isIntersectionDisabled = true;
-  }
+
+  isIntersectionDisabled = true;
   
-  // Clear toStopLightSet[0]
+  // Wait lights until they stuck and then disable them
+  toIntersection?INTERRUPT;
+  toIntersection?INTERRUPT;
+  toIntersection?INTERRUPT;
+  toIntersection?INTERRUPT;
+  
   pedestrianLight[0] = OFF;
   vehicleLight[0] = OFF;
-  
-  // Clear toStopLightSet[1]
-  pedestrianLight[1] == OFF;
+  pedestrianLight[1] = OFF;
   vehicleLight[1] = OFF;
    
   // Clear toTurnLightSet[0]
@@ -209,6 +201,8 @@ proctype disable() {
   
   // Clear toTurnLightSet[1]
   turnLight[1] = OFF;
+  
+  intersectionHasBeenDisabled = true;
 }
 
 init {

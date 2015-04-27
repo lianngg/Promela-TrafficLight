@@ -47,9 +47,12 @@
 // This property will be checked by SPIN Safety option
 
 // If the system is disabled, all system components should return to their OFF state
-//ltl p1 {
-  /* TODO */
-//}
+ltl p1 {
+  intersectionHasBeenDisabled ->
+  (vehicleLight[0]==OFF && vehicleLight[1]==OFF && 
+   pedestrianLight[0]==OFF && pedestrianLight[1]==OFF &&
+   turnLight[0]==OFF && turnLight[1]==OFF)
+}
 
 // Always when a pedestrian light is on WALK, the opposite vehicle stoplight must be RED   
 ltl p2 {
