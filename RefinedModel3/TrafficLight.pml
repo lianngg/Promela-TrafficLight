@@ -16,7 +16,7 @@ mtype = {OFF, GREEN, RED, ORANGE};  // signal state of vehicle and turn light
 mtype = {WALK, DONT_WALK};          // signal state of pedestrian light
 mtype = {INIT, ADVANCE, PRE_STOP, STOP, ALL_STOP};  // events
 mtype = {ACK, INTERRUPT};   // whenever light-set finished its task, send ACK to toIntersection 
-                 			// channel to let intersection move forward
+                      // channel to let intersection move forward
 
 /* Channels declaration */
 chan toStopLightSet[2] = [1] of {mtype}; // event queue for StopLights
@@ -143,11 +143,11 @@ proctype stopLightSet(bit id) {
      switchLinearTo(GREEN, id);
      toStopLightSet[id]!PRE_STOP;
   :: vehicleLight[id]==GREEN; 
-     toStopLightSet[id]?PRE_STOP ->
+     receiveEventOrInterupt(toStopLightSet[id], PRE_STOP);
      switchLinearTo(ORANGE, id);
      toStopLightSet[id]!STOP;
   :: vehicleLight[id]==ORANGE; 
-     toStopLightSet[id]?STOP ->
+     receiveEventOrInterupt(toStopLightSet[id], STOP);
      switchLinearToRed(id);
   :: vehicleLight[id]==OFF ->
      toIntersection!ACK;
@@ -166,11 +166,11 @@ proctype turnLightSet(bit id) {
      switchTurnTo(GREEN, turnLight[id]);
      toTurnLightSet[id]!PRE_STOP;
   :: turnLight[id]==GREEN; 
-     toTurnLightSet[id]?PRE_STOP ->
+     receiveEventOrInterupt(toTurnLightSet[id], PRE_STOP);
      switchTurnTo(ORANGE, turnLight[id]);
      toTurnLightSet[id]!STOP;
   :: turnLight[id]==ORANGE; 
-     toTurnLightSet[id]?STOP ->
+     receiveEventOrInterupt(toTurnLightSet[id], STOP);
      switchTurnToRed(turnLight[id]);
   :: turnLight[id]==OFF ->
      toIntersection!ACK;
@@ -181,8 +181,6 @@ proctype turnLightSet(bit id) {
 }
 
 proctype disable() {
-/* Index bug of the loop in Java code here FIX */
-
   isIntersectionDisabled = true;
   
   // Wait lights until they stuck and then disable them
@@ -191,15 +189,9 @@ proctype disable() {
   toIntersection?INTERRUPT;
   toIntersection?INTERRUPT;
   
-  pedestrianLight[0] = OFF;
-  vehicleLight[0] = OFF;
+  /* Index bug in Java code here. NOT fix */
   pedestrianLight[1] = OFF;
   vehicleLight[1] = OFF;
-   
-  // Clear toTurnLightSet[0]
-  turnLight[0] = OFF;
-  
-  // Clear toTurnLightSet[1]
   turnLight[1] = OFF;
   
   intersectionHasBeenDisabled = true;
