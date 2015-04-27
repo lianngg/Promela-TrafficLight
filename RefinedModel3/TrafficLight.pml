@@ -183,12 +183,6 @@ proctype turnLightSet(bit id) {
 proctype disable() {
   isIntersectionDisabled = true;
   
-  // Wait lights until they stuck and then disable them
-  toIntersection?INTERRUPT;
-  toIntersection?INTERRUPT;
-  toIntersection?INTERRUPT;
-  toIntersection?INTERRUPT;
-  
   /* Index bug in Java code here. NOT fix */
   pedestrianLight[1] = OFF;
   vehicleLight[1] = OFF;
