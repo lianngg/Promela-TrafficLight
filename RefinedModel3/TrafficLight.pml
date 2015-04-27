@@ -1,11 +1,9 @@
  /* Note, in this version, skip the following details:
    1. event queue capacity set to 1 (it's 5 in real code)
-   2. don't have interrupt functionality for now.
-      which means, can not disable when enable 
-   3. do not handle error condition, if there's an error case, 
+   2. do not handle error condition, if there's an error case, 
       SPIN will detect deadlock
-   4. No delay now
-   5. Do not implement block/unblock pedestrian control here
+   3. No delay now
+   4. Do not implement block/unblock pedestrian control here
    
    // TODO, consider Delay?
  */ 
